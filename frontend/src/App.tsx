@@ -5,6 +5,7 @@ import RolesPage from './pages/RolesPage';
 import RoleFormPage from './pages/RoleFormPage';
 import QuestionsPage from './pages/QuestionsPage';
 import QuestionFormPage from './pages/QuestionFormPage';
+import AssessmentDashboard from './pages/AssessmentDashboard';
 import { 
   AssessmentStart, 
   AssessmentWizard, 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/assessment" element={<AssessmentStart />} />
         <Route path="/assessment/:assessmentId/wizard" element={<AssessmentWizard />} />
         <Route path="/assessment/:assessmentId/complete" element={<AssessmentComplete />} />
+        <Route path="/assessment/:assessmentId/dashboard" element={<AssessmentDashboard />} />
 
         {/* 404 fallback */}
         <Route path="*" element={<Navigate to="/admin" replace />} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircleIcon, DocumentArrowDownIcon, ArrowRightIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, DocumentArrowDownIcon, ArrowRightIcon, ChartBarIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 interface AssessmentResult {
   id: string;
@@ -82,9 +82,28 @@ const AssessmentComplete: React.FC = () => {
     }
   };
 
-  const downloadReport = () => {
-    // TODO: Implement PDF report download
-    console.log('Download report functionality to be implemented');
+  const downloadReport = async () => {
+    if (!result) return;
+
+    try {
+      const response = await fetch(`/api/v1/assessments/${result.id}/report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const reportData = await response.json();
+        // Open report download URL
+        window.open(`/api/v1/reports/${reportData.reportId}/download`, '_blank');
+      } else {
+        setError('Failed to generate report');
+      }
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      setError('Failed to download report');
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -236,7 +255,7 @@ const AssessmentComplete: React.FC = () => {
         {/* Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Next Steps</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button
               onClick={generatePlan}
               disabled={generatingPlan}
@@ -267,11 +286,19 @@ const AssessmentComplete: React.FC = () => {
             </button>
 
             <button
-              onClick={() => navigate('/assessment')}
+              onClick={() => navigate(`/assessment/${result.id}/dashboard`)}
               className="flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <ChartBarIcon className="h-5 w-5 mr-2" />
-              Take New Assessment
+              View Dashboard
+            </button>
+
+            <button
+              onClick={() => navigate('/assessment')}
+              className="flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <ArrowPathIcon className="h-5 w-5 mr-2" />
+              New Assessment
             </button>
           </div>
         </div>
