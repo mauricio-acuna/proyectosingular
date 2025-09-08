@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -19,20 +20,30 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints
+                // Public endpoints - Assessment Flow
                 .requestMatchers("/api/v1/roles/**").permitAll()
                 .requestMatchers("/api/v1/assessments/**").permitAll()
+                .requestMatchers("/api/v1/reports/**").permitAll()
+                
+                // Health and monitoring
                 .requestMatchers("/actuator/health").permitAll()
-                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**").permitAll()
                 
                 // Admin endpoints require authentication
-                .requestMatchers("/api/v1/admin/**").authenticated()
+                .requestMatchers("/api/admin/**").authenticated()
                 .requestMatchers("/actuator/**").authenticated()
                 
-                // Allow all other requests for now (MVP)
+                // Static resources
+                .requestMatchers("/", "/static/**", "/public/**").permitAll()
+                
+                // Allow all other requests for MVP
                 .anyRequest().permitAll()
             )
-            .httpBasic(httpBasic -> {}); // Use HTTP Basic for admin endpoints
+            .httpBasic(httpBasic -> httpBasic.disable()) // Disable HTTP Basic for public endpoints
+            .formLogin(form -> form.disable()) // Disable form login for API-only endpoints
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
         
         return http.build();
     }

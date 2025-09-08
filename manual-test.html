@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Readiness Assessment - Manual Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            background: #4338CA;
+        }
+        
+        .result-area {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            min-height: 50px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .loading { color: #6c757d; }
+        
+        h1 { color: #333; text-align: center; }
+        h2 { color: #4F46E5; }
+        
+        .endpoint-test {
+            border-left: 4px solid #4F46E5;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 AI Readiness Assessment - Manual Testing</h1>
+    
+    <div class="test-section">
+        <h2>Backend API Tests</h2>
+        <p>Test each endpoint individually to verify the backend is working correctly.</p>
+        
+        <div class="endpoint-test">
+            <h3>1. Get Available Roles</h3>
+            <button class="test-button" onclick="testGetRoles()">Test GET /api/v1/roles</button>
+            <div id="roles-result" class="result-area">Click the button to test...</div>
+        </div>
+        
+        <div class="endpoint-test">
+            <h3>2. Get Questions for Role</h3>
+            <button class="test-button" onclick="testGetQuestions()">Test GET /api/v1/roles/software-engineer/questions</button>
+            <div id="questions-result" class="result-area">Click the button to test...</div>
+        </div>
+        
+        <div class="endpoint-test">
+            <h3>3. Create Assessment</h3>
+            <button class="test-button" onclick="testCreateAssessment()">Test POST /api/v1/assessments</button>
+            <div id="assessment-result" class="result-area">Click the button to test...</div>
+        </div>
+        
+        <div class="endpoint-test">
+            <h3>4. Generate Report</h3>
+            <button class="test-button" onclick="testGenerateReport()" id="report-btn" disabled>Test POST /api/v1/assessments/{id}/report</button>
+            <div id="report-result" class="result-area">Create an assessment first...</div>
+        </div>
+        
+        <div class="endpoint-test">
+            <h3>5. Get Summary</h3>
+            <button class="test-button" onclick="testGetSummary()" id="summary-btn" disabled>Test GET /api/v1/assessments/{id}/summary</button>
+            <div id="summary-result" class="result-area">Create an assessment first...</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Frontend Component Tests</h2>
+        <p>Links to test the React frontend components:</p>
+        
+        <div>
+            <a href="http://localhost:5173/assessment" target="_blank" rel="noopener" class="test-button">
+                Test Assessment Start Page
+            </a>
+            <p>Should show role selection and start assessment.</p>
+        </div>
+        
+        <div>
+            <a href="http://localhost:5173/admin" target="_blank" rel="noopener" class="test-button">
+                Test Admin Dashboard
+            </a>
+            <p>Should show admin interface with role/question management.</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results Summary</h2>
+        <div id="test-summary" class="result-area">
+            Run the tests above to see a summary of results...
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8080/api/v1';
+        let currentAssessmentId = null;
+        let testResults = {
+            roles: false,
+            questions: false,
+            assessment: false,
+            report: false,
+            summary: false
+        };
+        
+        function updateResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = 'result-area ' + (isSuccess ? 'success' : 'error');
+            updateSummary();
+        }
+        
+        function setLoading(elementId, message = 'Loading...') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = 'result-area loading';
+        }
+        
+        async function testGetRoles() {
+            setLoading('roles-result');
+            try {
+                const response = await fetch(`${BASE_URL}/roles`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateResult('roles-result', `✅ Success! Found ${data.length} roles: ${JSON.stringify(data, null, 2)}`);
+                    testResults.roles = true;
+                } else {
+                    updateResult('roles-result', `❌ Error: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                updateResult('roles-result', `❌ Network Error: ${error.message}`, false);
+            }
+        }
+        
+        async function testGetQuestions() {
+            setLoading('questions-result');
+            try {
+                const response = await fetch(`${BASE_URL}/roles/software-engineer/questions`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateResult('questions-result', `✅ Success! Found ${data.length} questions: ${JSON.stringify(data, null, 2)}`);
+                    testResults.questions = true;
+                } else {
+                    updateResult('questions-result', `❌ Error: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                updateResult('questions-result', `❌ Network Error: ${error.message}`, false);
+            }
+        }
+        
+        async function testCreateAssessment() {
+            setLoading('assessment-result');
+            const payload = {
+                roleId: 'software-engineer',
+                userEmail: 'test@example.com',
+                answers: [
+                    { questionId: 'q1', selectedOption: 'option1' },
+                    { questionId: 'q2', selectedOption: 'option2' }
+                ]
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/assessments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentAssessmentId = data.id;
+                    updateResult('assessment-result', `✅ Success! Assessment ID: ${data.id}\\n${JSON.stringify(data, null, 2)}`);
+                    testResults.assessment = true;
+                    
+                    // Enable dependent tests
+                    document.getElementById('report-btn').disabled = false;
+                    document.getElementById('summary-btn').disabled = false;
+                } else {
+                    updateResult('assessment-result', `❌ Error: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                updateResult('assessment-result', `❌ Network Error: ${error.message}`, false);
+            }
+        }
+        
+        async function testGenerateReport() {
+            if (!currentAssessmentId) {
+                updateResult('report-result', '❌ No assessment ID available', false);
+                return;
+            }
+            
+            setLoading('report-result');
+            const payload = {
+                title: 'Test Report',
+                includeCharts: true,
+                includeRecommendations: true
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/assessments/${currentAssessmentId}/report`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateResult('report-result', `✅ Success! Report ID: ${data.reportId}\\n${JSON.stringify(data, null, 2)}`);
+                    testResults.report = true;
+                } else {
+                    updateResult('report-result', `❌ Error: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                updateResult('report-result', `❌ Network Error: ${error.message}`, false);
+            }
+        }
+        
+        async function testGetSummary() {
+            if (!currentAssessmentId) {
+                updateResult('summary-result', '❌ No assessment ID available', false);
+                return;
+            }
+            
+            setLoading('summary-result');
+            try {
+                const response = await fetch(`${BASE_URL}/assessments/${currentAssessmentId}/summary`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateResult('summary-result', `✅ Success! Summary data:\\n${JSON.stringify(data, null, 2)}`);
+                    testResults.summary = true;
+                } else {
+                    updateResult('summary-result', `❌ Error: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                updateResult('summary-result', `❌ Network Error: ${error.message}`, false);
+            }
+        }
+        
+        function updateSummary() {
+            const passed = Object.values(testResults).filter(result => result).length;
+            const total = Object.keys(testResults).length;
+            const summaryEl = document.getElementById('test-summary');
+            
+            summaryEl.innerHTML = `
+                <h3>Test Results: ${passed}/${total} Passed</h3>
+                <ul>
+                    <li>✅ Roles API: ${testResults.roles ? 'PASS' : 'PENDING'}</li>
+                    <li>✅ Questions API: ${testResults.questions ? 'PASS' : 'PENDING'}</li>
+                    <li>✅ Assessment Creation: ${testResults.assessment ? 'PASS' : 'PENDING'}</li>
+                    <li>✅ Report Generation: ${testResults.report ? 'PASS' : 'PENDING'}</li>
+                    <li>✅ Summary Data: ${testResults.summary ? 'PASS' : 'PENDING'}</li>
+                </ul>
+                ${passed === total ? '<p class="success"><strong>🎉 All tests passed! The end-to-end flow is working correctly.</strong></p>' : ''}
+            `;
+        }
+        
+        // Initialize summary
+        updateSummary();
+    </script>
+</body>
+</html>

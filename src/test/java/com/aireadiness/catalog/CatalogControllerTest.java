@@ -4,6 +4,7 @@ import com.aireadiness.catalog.controller.CatalogController;
 import com.aireadiness.catalog.service.CatalogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,7 +18,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests for CatalogController
  */
-@WebMvcTest(CatalogController.class)
+@WebMvcTest(controllers = CatalogController.class, 
+            excludeAutoConfiguration = {
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+            })
+@AutoConfigureWebMvc
 class CatalogControllerTest {
     
     @Autowired
