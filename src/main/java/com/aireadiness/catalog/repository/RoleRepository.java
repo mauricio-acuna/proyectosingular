@@ -39,6 +39,12 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     List<Role> findAllWithActiveVersions();
     
     /**
+     * Find all roles that have published versions (for catalog API)
+     */
+    @Query("SELECT DISTINCT r FROM Role r JOIN r.versions v WHERE v.active = true AND r.active = true")
+    List<Role> findAllWithPublishedVersions();
+    
+    /**
      * Find role with its active version
      */
     @Query("SELECT r FROM Role r JOIN FETCH r.versions v WHERE r.id = :roleId AND v.active = true AND r.active = true")

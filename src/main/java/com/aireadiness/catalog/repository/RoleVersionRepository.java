@@ -35,6 +35,19 @@ public interface RoleVersionRepository extends JpaRepository<RoleVersion, Long> 
     Optional<RoleVersion> findByRoleIdAndVersionNumberWithQuestions(@Param("roleId") Long roleId, @Param("versionNumber") Integer versionNumber);
     
     /**
+     * Find version with questions by role string ID and version string
+     * Support for string-based API endpoints
+     */
+    @Query("SELECT rv FROM RoleVersion rv LEFT JOIN FETCH rv.questions rq LEFT JOIN FETCH rq.question WHERE CAST(rv.role.id AS string) = :roleId AND rv.versionNumber = CAST(:version AS integer)")
+    Optional<RoleVersion> findByRoleIdAndVersionWithQuestions(@Param("roleId") String roleId, @Param("version") String version);
+    
+    /**
+     * Find published/active version by string role ID
+     */
+    @Query("SELECT rv FROM RoleVersion rv WHERE CAST(rv.role.id AS string) = :roleId AND rv.active = true")
+    Optional<RoleVersion> findPublishedByRoleId(@Param("roleId") String roleId);
+    
+    /**
      * Find all versions for a role ordered by version number desc
      */
     List<RoleVersion> findByRoleIdOrderByVersionNumberDesc(Long roleId);

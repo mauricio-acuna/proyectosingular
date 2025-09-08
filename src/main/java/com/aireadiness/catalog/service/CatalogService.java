@@ -10,7 +10,6 @@ import com.aireadiness.catalog.repository.RoleVersionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,7 +52,7 @@ public class CatalogService {
             if (roleVersionOpt.isPresent()) {
                 // Fetch with questions
                 roleVersionOpt = roleVersionRepository.findByRoleIdAndVersionWithQuestions(
-                    roleId, roleVersionOpt.get().getVersion()
+                    roleId, roleVersionOpt.get().getVersionNumber().toString()
                 );
             }
         }
@@ -71,26 +70,25 @@ public class CatalogService {
     private RoleDto toRoleDto(Role role) {
         // Get published version
         Optional<RoleVersion> publishedVersion = role.getVersions().stream()
-                .filter(RoleVersion::getIsPublished)
+                .filter(RoleVersion::getActive)
                 .findFirst();
         
-        String version = publishedVersion.map(RoleVersion::getVersion).orElse("1.0");
+        String version = publishedVersion.map(rv -> rv.getVersionNumber().toString()).orElse("1");
         
-        return new RoleDto(role.getId(), role.getName(), version, role.getDescription());
+        return new RoleDto(role.getId().toString(), role.getName(), version, role.getDescription());
     }
     
     private QuestionDto toQuestionDto(RoleQuestion roleQuestion, String locale) {
         var question = roleQuestion.getQuestion();
-        String text = locale != null && locale.startsWith("en") ? 
-            question.getTextEn() : question.getTextEs();
+        String text = question.getText(); // Use single text for MVP, could add i18n later
         
         return new QuestionDto(
-            question.getId(),
+            question.getId().toString(),
             text,
             question.getType(),
             question.getPillar(),
             roleQuestion.getWeight(),
-            question.getHelp(),
+            question.getContext(), // Use context as help text
             roleQuestion.getOrder()
         );
     }
